@@ -9,6 +9,12 @@
 
 const video = document.querySelector("video");
 
+function validateSecurityInput(input) {
+    if (typeof input !== 'string' || /[\x00-\x1F\x7F]/.test(input)) {
+        throw new Error('Invalid security input');
+    }
+}
+
 console.log("STARTING GAMESTREAM JS");
     const webrtcDataChannels = {};
 
@@ -59,7 +65,16 @@ console.log("STARTING GAMESTREAM JS");
         console.log("sessionId", sessionId);
         console.log("token", token);
 
-        const webrtcClient = new RTCPeerConnection({});
+        const webrtcClient = new RTCPeerConnection({
+            iceServers: [
+                { urls: 'stun:52.138.150.152:3478' },
+                {
+                    urls: 'turn:52.138.150.152:3478',
+                    username: 'xbplay',
+                    credential: 'xbplaysecret'
+                }
+            ]
+        });
         console.log("here1", webrtcClient);
 
         // Open Data channels
@@ -179,7 +194,6 @@ for (var stream of streams) {
                     console.log('xSDK - Error video...', event);
                 });
 
-               // this.#renderClient.video.videoSource = videoSourceBuffer
             }
         });
 
@@ -191,19 +205,19 @@ for (var stream of streams) {
         videoRender.height = videoHolder.clientHeight;
         videoRender.play()
 
-        //this.#renderClient.video.mediaSource = mediaSource
-        //this.#renderClient.video.videoRender = videoRender
 
         videoHolder.appendChild(videoRender);
     }
     function sendIce(ice, sessionId, token){
+        validateSecurityInput(sessionId);
+        validateSecurityInput(token);
         return new Promise((resolve, reject) => {
             const postData = {
                 "messageType": "iceCandidate",
                 "candidate": ice
             }
 
-            fetch('https://uks.gssv-play-prodxhome.xboxlive.com/v4/sessions/home/'+ sessionId + '/ice', {
+            fetch('https://uks.gssv-play-prodxhome.xboxlive.com/v4/sessions/home/'+ encodeURIComponent(sessionId) + '/ice', {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 headers: {
                     'Content-Type': 'application/json',
@@ -223,6 +237,8 @@ for (var stream of streams) {
     }
 
     async function sendSdp(sdp, sessionId, token) {
+        validateSecurityInput(sessionId);
+        validateSecurityInput(token);
         return new Promise((resolve, reject) => {
             const postData = {
                 "messageType":"offer",
@@ -269,7 +285,7 @@ for (var stream of streams) {
 
             // const streamClient = this
 
-            fetch('https://uks.gssv-play-prodxhome.xboxlive.com/v4/sessions/home/'+ sessionId +'/sdp', {
+            fetch('https://uks.gssv-play-prodxhome.xboxlive.com/v4/sessions/home/'+ encodeURIComponent(sessionId) +'/sdp', {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 headers: {
                     'Content-Type': 'application/json',
@@ -290,12 +306,15 @@ for (var stream of streams) {
 
     // functions
     async function isExchangeReady(path, sessionId, token, retries = 5) {
+        validateSecurityInput(path);
+        validateSecurityInput(sessionId);
+        validateSecurityInput(token);
         if (retries < 1) {
             throw new Error("Exchange not ready" + path)
         }
         return new Promise((resolve, reject) => {
 
-            const url = "https://uks.gssv-play-prodxhome.xboxlive.com/v4/sessions/home/"+sessionId+'/'+path
+            const url = 'https://uks.gssv-play-prodxhome.xboxlive.com/v4/sessions/home/'+encodeURIComponent(sessionId)+'/'+encodeURIComponent(path)
             const init = {
                 method: 'GET',
                 headers: {
@@ -303,7 +322,6 @@ for (var stream of streams) {
                     'Authorization': 'Bearer ' + token,
                 }
             }
-            console.log(JSON.stringify(init));
             fetch(url, init).then(response => {
                 if(response.status !== 200){
                     console.log('StreamClient.js: '+url+' - Waiting...');

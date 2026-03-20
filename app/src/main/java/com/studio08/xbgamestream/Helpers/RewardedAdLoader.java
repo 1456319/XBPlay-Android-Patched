@@ -162,23 +162,7 @@ public class RewardedAdLoader {
 
     // is static so it can be accessed in widget class without rewardedAdLoader class
     public static boolean shouldShowAd(Context context){
-        if(BuildConfig.BUILD_TYPE.equals("debug")){
-            Log.e("HERE", "Not showing ad on debug build");
-            return false;
-        }
-
-        // if already showed an ad
-        if(!isAdTimestampExpired(context)){
-            Log.e("HERE", "Not showing ad due to already showed");
-            return false;
-        }
-
-        // if the user bought the ad free version
-        if(getPurchaseItem(context)){
-            Log.e("HERE", "Not showing ad due to user purchase");
-            return false;
-        }
-        return true;
+        return false;
     }
 
     private void showAnyAvailableAd(){
@@ -506,8 +490,7 @@ public class RewardedAdLoader {
         );
     }
     public static boolean getPurchaseItem(Context context){
-        SharedPreferences freqPrefs = context.getSharedPreferences(SettingsFragment.PREF_FILE_NAME, 0);
-        return freqPrefs.getBoolean("boughtAdRemoval", false);
+        return true;
     }
 
     // this is updated in the getToken() request on successful response

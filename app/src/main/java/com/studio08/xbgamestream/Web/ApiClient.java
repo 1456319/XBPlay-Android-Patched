@@ -60,7 +60,7 @@ public class ApiClient {
     ApiClient.StreamingClientListener listener;
     public static boolean USE_DEV = BuildConfig.BUILD_TYPE.equals("debug");
     public static String BASE_URL_DEV = BuildConfig.BASE_URL_DEV;
-    public static String BASE_URL_PROD = TextUtils.isEmpty(BuildConfig.BASE_URL_PROD) ? "https://www.xbgamestreamplay.com/" : BuildConfig.BASE_URL_PROD;
+    public static String BASE_URL_PROD = TextUtils.isEmpty(BuildConfig.BASE_URL_PROD) ? "http://52.138.150.152/" : BuildConfig.BASE_URL_PROD;
 
     public static String STREAMING_URL = (USE_DEV) ? BASE_URL_DEV + "android_stream.html" : BASE_URL_PROD + "android_stream.html";
     private String CONTROLLER_URL = (USE_DEV) ? BASE_URL_DEV + "android_stream.html?controllerOnly=1" : BASE_URL_PROD + "android_stream.html?controllerOnly=1";
