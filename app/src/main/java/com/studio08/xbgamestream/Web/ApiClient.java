@@ -62,12 +62,12 @@ public class ApiClient {
     public static String BASE_URL_DEV = BuildConfig.BASE_URL_DEV;
     public static String BASE_URL_PROD = TextUtils.isEmpty(BuildConfig.BASE_URL_PROD) ? "http://52.138.150.152/" : BuildConfig.BASE_URL_PROD;
 
-    public static String STREAMING_URL = (USE_DEV) ? BASE_URL_DEV + "android_stream.html" : BASE_URL_PROD + "android_stream.html";
-    private String CONTROLLER_URL = (USE_DEV) ? BASE_URL_DEV + "android_stream.html?controllerOnly=1" : BASE_URL_PROD + "android_stream.html?controllerOnly=1";
+    public static String STREAMING_URL = "file:///android_asset/android_stream.html";
+    private String CONTROLLER_URL = "file:///android_asset/android_stream.html?controllerOnly=1";
     private String CONTROLLER_BUILDER_URL = (USE_DEV) ? BASE_URL_DEV + "builder/controller_builder.html" : BASE_URL_PROD + "builder/controller_builder.html";
     private String TUTORIAL_SCREENS_URL = (USE_DEV) ? BASE_URL_DEV + "swipe-screens/features_full.html" : BASE_URL_PROD + "swipe-screens/features_full.html";
-    private String WIFI_REMOTE_URL = (USE_DEV) ? BASE_URL_DEV + "android_stream.html?remoteOnly=1" : BASE_URL_PROD + "android_stream.html?remoteOnly=1";
-    private String CAST_REMOTE_URL = (USE_DEV) ? BASE_URL_DEV + "android_stream.html?castRemoteOnly=1" : BASE_URL_PROD + "android_stream.html?castRemoteOnly=1";
+    private String WIFI_REMOTE_URL = "file:///android_asset/android_stream.html?remoteOnly=1";
+    private String CAST_REMOTE_URL = "file:///android_asset/android_stream.html?castRemoteOnly=1";
     private String PHYSICAL_CONTROLLER_SETUP_URL = (USE_DEV) ? BASE_URL_DEV + "physical_controller/setup.html" : BASE_URL_PROD + "physical_controller/setup.html";
     private String LOOKUP_TVCODE_BASE_URL = (USE_DEV) ? BASE_URL_DEV + "aws/tv_code" : BASE_URL_PROD + "aws/tv_code";
     private String WEBOS_TVCODE_BASE_URL = (USE_DEV) ? BASE_URL_DEV + "aws/webos/tv_code_tokens" : BASE_URL_PROD + "aws/webos/tv_code_tokens";
@@ -353,19 +353,22 @@ public class ApiClient {
     }
 
     public void doStreaming() {
+        SharedPreferences prefs = this.context.getSharedPreferences(SettingsFragment.PREF_FILE_NAME, 0);
+        boolean useFallback = prefs.getBoolean("use_fallback_xbox_play_key", false);
+        String targetUrl = useFallback ? "https://www.xbox.com/play" : this.STREAMING_URL;
         TWAClient twaClient = new TWAClient(context, getConfigSettings());
-        if (twaClient.getShouldUseTWA()){
+        if (twaClient.getShouldUseTWA() && useFallback){
             Log.e("APICLIENT", "Using TWA to stream");
-            twaClient.launchTWSA(this.STREAMING_URL);
+            twaClient.launchTWSA(targetUrl);
         } else if (geckoWebviewClient != null){
             Log.e("APICLIENT", "Using geckoview to stream");
             geckoWebviewClient.setCustomObjectListener(webviewListener);
-            geckoWebviewClient.loadUrl(this.STREAMING_URL);
+            geckoWebviewClient.loadUrl(targetUrl);
         } else {
             Log.e("APICLIENT", "Using system webview");
             this.streamWebview.setWebViewClient(webviewStreamStartClient);
             this.streamWebview.setCustomObjectListener(webviewListener);
-            this.streamWebview.loadUrl(this.STREAMING_URL);
+            this.streamWebview.loadUrl(targetUrl);
         }
     }
 
