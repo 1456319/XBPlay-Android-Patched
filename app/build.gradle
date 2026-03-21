@@ -67,12 +67,13 @@ android {
         }
     }
     packagingOptions {
-        exclude 'assets/dexopt/baseline.prof'
+
+
         resources {
             excludes += ['META-INF/DEPENDENCIES']
         }
-        exclude 'assets/dexopt/baseline.prof'
-        exclude 'assets/dexopt/baseline.profm'
+        pickFirst 'assets/dexopt/baseline.prof'
+
     }
 }
 
