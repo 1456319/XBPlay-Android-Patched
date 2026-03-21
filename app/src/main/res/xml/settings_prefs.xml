@@ -5,6 +5,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="General">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="use_fallback_xbox_play_key"
+            android:summary="If the local player is not working, load xbox.com/play directly."
+            android:title="Use Official Xbox.com/play (Fallback)" />
 
         <Preference
             android:title="Rate App"

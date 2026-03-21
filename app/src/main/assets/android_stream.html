@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Stream</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #videoHolder {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <div id="videoHolder"></div>
+    <script src="file:///android_asset/xCloudPlayer.min.js"></script>
+    <script>
+        let player = null;
+        let backend = null;
+
+        function setConfigData(configStr) {
+            console.log("Config received:", configStr);
+            let config = {};
+            try {
+                config = JSON.parse(configStr);
+            } catch (e) {
+                console.error("Failed to parse config", e);
+                return;
+            }
+
+            if (config["video-fit"]) {
+                const style = document.createElement('style');
+                style.innerHTML = `video { object-fit: ${config["video-fit"]} !important; }`;
+                document.head.appendChild(style);
+            }
+
+            const PlayerClass = xCloudPlayer.default || xCloudPlayer;
+            player = new PlayerClass("videoHolder", {
+                input_touch: false,
+                input_mousekeyboard: false,
+                input_legacykeyboard: false
+            });
+
+            if (config.maxBitrate) {
+                player.setVideoBitrate(parseInt(config.maxBitrate));
+            }
+
+            player.bind();
+
+            const gsToken = config.gsToken;
+            const serverId = config.serverId;
+
+            // In order to start a session using xCloudPlayer library:
+            // 1. Initialize the backend API wrapper (assuming Backend or xCloudPlayerBackend is available)
+            // Note: If the backend wrapper relies on specific fetch interception or token headers, we must pass the tokens.
+
+            // This basic logic delegates to the xCloudPlayer library backend components, if exposed.
+            // If the library was built using webpack, 'xCloudPlayer' exposes default as the player.
+            // Often we'd need a backend instance to negotiate.
+
+            if (xCloudPlayer.xCloudPlayerBackend) {
+                backend = new xCloudPlayer.xCloudPlayerBackend();
+                backend.setSessionId(serverId);
+
+                // Need to patch fetch inside xCloudPlayerBackend to intercept requests and prepend token
+                const originalFetch = window.fetch;
+                window.fetch = async (...args) => {
+                    let [resource, configFetch] = args;
+                    if (typeof resource === 'string' && resource.startsWith('/v5/sessions/')) {
+                        // Change the URL to absolute using the target Xbox servers endpoint
+                        // However, local android streaming uses direct endpoints or proxy through java.
+                        resource = 'https://xhome.xboxlive.com' + resource; // Example endpoint, adjust as needed
+
+                        if(!configFetch) configFetch = {};
+                        if(!configFetch.headers) configFetch.headers = {};
+                        configFetch.headers['Authorization'] = 'Bearer ' + gsToken;
+                    }
+                    const response = await originalFetch(resource, configFetch);
+                    return response;
+                };
+
+                backend.startSession('home', serverId).then(() => {
+                    player.createOffer().then((offer) => {
+                        backend.sendSDPOffer(offer).then((sdpResponse) => {
+                            player.setRemoteOffer(sdpResponse.sdp);
+                            const iceCandidates = player.getIceCandidates();
+                            backend.sendICECandidates(iceCandidates).then((iceResponse) => {
+                                player.setIceCandidates(iceResponse);
+                            });
+                        });
+                    });
+                }).catch(e => console.error("Session start error", e));
+            } else {
+                console.log("xCloudPlayerBackend not exposed. Running in standalone player mode.");
+            }
+
+            console.log("Ready to stream serverId: " + serverId);
+        }
+
+        window.setConfigData = setConfigData;
+    </script>
+</body>
+</html>
