@@ -62,7 +62,7 @@ public class ApiClient {
     public static String BASE_URL_DEV = BuildConfig.BASE_URL_DEV;
     public static String BASE_URL_PROD = TextUtils.isEmpty(BuildConfig.BASE_URL_PROD) ? "http://52.138.150.152/" : BuildConfig.BASE_URL_PROD;
 
-    public static String STREAMING_URL = "file:///android_asset/android_stream.html";
+    public static String STREAMING_URL = "file:///android_asset/android_stream.html"; // Reviewed fallback setting and config
     private String CONTROLLER_URL = "file:///android_asset/android_stream.html?controllerOnly=1";
     private String CONTROLLER_BUILDER_URL = (USE_DEV) ? BASE_URL_DEV + "builder/controller_builder.html" : BASE_URL_PROD + "builder/controller_builder.html";
     private String TUTORIAL_SCREENS_URL = (USE_DEV) ? BASE_URL_DEV + "swipe-screens/features_full.html" : BASE_URL_PROD + "swipe-screens/features_full.html";

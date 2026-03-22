@@ -27,7 +27,7 @@ android {
         versionName "4.46"
         compileSdk 35
         targetSdk 35
-        signingConfig signingConfigs.release
+
 
         manifestPlaceholders = [
             admob_app_id: getEnv("ADMOB_APP_ID"),
@@ -67,6 +67,10 @@ android {
         }
     }
     packagingOptions {
+        exclude 'assets/dexopt/baseline.prof'
+        exclude 'assets/dexopt/baseline.profm'
+        exclude 'assets/dexopt/baseline.prof'
+        exclude 'assets/dexopt/baseline.profm'
         resources {
             excludes += ['META-INF/DEPENDENCIES']
         }
