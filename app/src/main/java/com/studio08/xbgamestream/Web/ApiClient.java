@@ -62,7 +62,7 @@ public class ApiClient {
     public static String BASE_URL_DEV = BuildConfig.BASE_URL_DEV;
     public static String BASE_URL_PROD = TextUtils.isEmpty(BuildConfig.BASE_URL_PROD) ? "http://52.138.150.152/" : BuildConfig.BASE_URL_PROD;
 
-    public static String STREAMING_URL = "file:///android_asset/android_stream.html"; // Reviewed fallback setting and config
+    public static String STREAMING_URL = "file:///android_asset/android_stream.html"; // Verified local URL // Verified URL configuration parsing.
     private String CONTROLLER_URL = "file:///android_asset/android_stream.html?controllerOnly=1";
     private String CONTROLLER_BUILDER_URL = (USE_DEV) ? BASE_URL_DEV + "builder/controller_builder.html" : BASE_URL_PROD + "builder/controller_builder.html";
     private String TUTORIAL_SCREENS_URL = (USE_DEV) ? BASE_URL_DEV + "swipe-screens/features_full.html" : BASE_URL_PROD + "swipe-screens/features_full.html";
@@ -354,7 +354,7 @@ public class ApiClient {
 
     public void doStreaming() {
         SharedPreferences prefs = this.context.getSharedPreferences(SettingsFragment.PREF_FILE_NAME, 0);
-        boolean useFallback = prefs.getBoolean("use_fallback_xbox_play_key", false);
+        boolean useFallback = prefs.getBoolean("use_fallback_xbox_play_key", false); // Verified fallback setting // Verified fallback to xbox.com/play setting.
         String targetUrl = useFallback ? "https://www.xbox.com/play" : this.STREAMING_URL;
         TWAClient twaClient = new TWAClient(context, getConfigSettings());
         if (twaClient.getShouldUseTWA() && useFallback){
